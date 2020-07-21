@@ -84,4 +84,10 @@ public class VisitEventServiceImpl implements VisitEventService {
         return visitEventDto;
     }
 
+    @Override
+    public List<VisitEvent> findAllEventsBetweenDates(Date dateFrom, Date dateTo) {
+        List<VisitEvent> visitEvents = visitEventRepository.getVisitEventsBetween(dateFrom, dateTo);
+        return  visitEvents;
+    }
+
 }

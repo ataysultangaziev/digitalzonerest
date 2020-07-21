@@ -5,13 +5,15 @@ import com.example.digitalzonerest.dto.StatisticsDto;
 import com.example.digitalzonerest.model.Page;
 import com.example.digitalzonerest.model.VisitEvent;
 import com.example.digitalzonerest.service.PageService;
+import com.example.digitalzonerest.service.VisitEventService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -27,10 +29,12 @@ import java.util.List;
 public class StatisticsRestControllerV1 {
 
     private final PageService pageService;
+    private final VisitEventService visitEventService;
 
     @Autowired
-    public StatisticsRestControllerV1(PageService pageService) {
+    public StatisticsRestControllerV1(PageService pageService, VisitEventService visitEventService) {
         this.pageService = pageService;
+        this.visitEventService = visitEventService;
     }
 
     @GetMapping
@@ -45,20 +49,14 @@ public class StatisticsRestControllerV1 {
         Date convertedDateFrom = df.parse(dateFrom);
         Date convertedDateTo = df.parse(dateTo);
 
-        List<Page> pages = new ArrayList<>();
-
-        pages = pageService.getAll();
-
         //Все визиты которые есть для первого и второго задания
         List<VisitEvent> visitEvents = new ArrayList<>();
         //Все визиты которые есть для третьего задания
         List<VisitEvent> visitEventsTemp = new ArrayList<>();
 
         //Собираем все визиты со всех страниц
-        for (int i = 0; i < pages.size(); i++) {
-            visitEvents.addAll(pages.get(i).getVisitEvents());
-            visitEventsTemp.addAll(pages.get(i).getVisitEvents());
-        }
+        visitEvents = visitEventService.findAllEventsBetweenDates(convertedDateFrom, convertedDateTo);
+        visitEventsTemp = visitEventService.findAllEventsBetweenDates(convertedDateFrom, convertedDateTo);
 
         //Удаляем все визиты которые были не сегодня
         for (int i = 0; i < visitEvents.size(); i++) {
@@ -83,7 +81,6 @@ public class StatisticsRestControllerV1 {
         }
 
         statisticsDto.setUniqueUsersQuantity(visitEvents.size());
-
 
         int counter = 0;
         for (int i = 0; i < visitEventsTemp.size(); i++) {
