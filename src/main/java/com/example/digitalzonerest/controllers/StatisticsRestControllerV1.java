@@ -56,7 +56,7 @@ public class StatisticsRestControllerV1 {
 
         //Собираем все визиты со всех страниц
         visitEvents = visitEventService.findAllEventsBetweenDates(convertedDateFrom, convertedDateTo);
-        visitEventsTemp = visitEventService.findAllEventsBetweenDates(convertedDateFrom, convertedDateTo);
+        visitEventsTemp.addAll(visitEvents);
 
         //Удаляем все визиты которые были не сегодня
         for (int i = 0; i < visitEvents.size(); i++) {
